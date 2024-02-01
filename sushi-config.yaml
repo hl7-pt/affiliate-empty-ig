@@ -178,7 +178,6 @@ menu:
   IG Home: index.html
   Background: background.html
   Specification: spec.html
-  Table of Contents: toc.html
   Artifact Index: artifacts.html			
   Downloads: downloads.html
 # The parameters property represents IG.definition.parameter. Rather
