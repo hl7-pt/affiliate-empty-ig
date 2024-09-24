@@ -1,23 +1,9 @@
-Empty IG
----
-This is an empty IG
-<br> </br>
-###
-### Publication
-This ImplementationGuide is published in the following locations:
+## Empty IG
 
-Continuous Build: __http://build.fhir.org/ig/<handle>/<repo>/branches/main/index.html__  
-Canonical / permanent URL: 
-<br> </br>
+Este IG está vazio e serve de template para quem criar IGs no ecossistema Português.
 
-### Issues
-Issues and change requests are managed here:  
 
-Issues:  __https://github.com/<handle>/<repo>/issues__  
-Kanban board:  __https://github.com/<handle>/<repo>/projects/1__  
-
----
-
+### Publicação
 
 
 ### Instruções
