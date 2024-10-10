@@ -81,10 +81,11 @@ Ler os FHIR Implementation Guides (IGs) é fundamental para entender como implem
 Os FHIR Implementation Guides são igualmente úteis na validação de documentos e recursos FHIR. Ferramentas como o FHIR Validator, disponíveis através do HL7 e outras plataformas, permitem validar instâncias de recursos contra os perfis definidos nos IGs. Esse processo de validação assegura que os documentos e recursos estejam em conformidade com as especificações e restrições definidas, garantindo interoperabilidade e consistência de dados entre diferentes sistemas. Além disso, a validação pode identificar erros e discrepâncias que precisam ser corrigidos para atender aos requisitos de conformidade. Usando os IGs como referência, desenvolvedores e implementadores podem assegurar que suas implementações FHIR não apenas atendam aos padrões técnicos, mas também cumpram os objetivos clínicos e administrativos para os quais foram projetadas.
 
 * Exemplo de validação de recursos FHIR em função deste IG com plataforma web:
-1. ir a [https://inferno.healthit.gov/validator/)(https://inferno.healthit.gov/validator/)
-2. subemter o recurso
-3. nas opções escolher o IG a usar (à partida será hl7.fhir.pt.xxxx)
-4. validar
+1. ir a [https://inferno.healthit.gov/validator/](https://inferno.healthit.gov/validator/)
+2. submeter/colar o recurso
+3. Nas opções "advanced options" escolher o IG a usar (à partida será hl7.fhir.pt.xxxx) ou fazer o upload do package.tgz (quando não aparece o IG pretendido)
+> o package.tgz está na raiz + /package.tgz (ou seja: \<URL base\>/package.tgz)
+5. validar
 
 
 * Exemplo de validação de recursos FHIR em função deste IG com FHIR Validator:
