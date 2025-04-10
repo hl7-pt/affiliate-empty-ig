@@ -9,11 +9,15 @@ Este IG está vazio e serve de template para quem criar IGs no ecossistema Portu
 ### Instruções
 
 
-#### Desenvolvimento local
+#### Desenvolvimento local com java
 
 1. correr o updatepublisher
-2. correr o genonce
+2. correr o genonce_java
 3. o conteudo do site estará na pasta output
+
+#### Desenvolvimento local com docker
+1. correr o genonce
+2. o conteudo do site estará na pasta output
 
 #### locais a usar
 
