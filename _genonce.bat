@@ -1,27 +1,17 @@
 @ECHO OFF
-SET publisher_jar=publisher.jar
-SET input_cache_path=%CD%\input-cache
+SETLOCAL ENABLEDELAYEDEXPANSION
 
 ECHO Checking internet connection...
-PING tx.fhir.org -4 -n 1 -w 1000 | FINDSTR TTL && GOTO isonline
-ECHO We're offline...
-SET txoption=-tx n/a
-GOTO igpublish
-
-:isonline
-ECHO We're online
-SET txoption=
-
-:igpublish
-
-SET JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
-
-IF EXIST "%input_cache_path%\%publisher_jar%" (
-	JAVA -jar "%input_cache_path%\%publisher_jar%" -ig . %txoption% %*
-) ELSE If exist "..\%publisher_jar%" (
-	JAVA -jar "..\%publisher_jar%" -ig . %txoption% %*
+PING tx.fhir.org -4 -n 1 -w 1000 | FINDSTR TTL >nul
+IF %ERRORLEVEL% EQU 0 (
+    ECHO We're online
+    SET "txoption="
 ) ELSE (
-	ECHO IG Publisher NOT FOUND in input-cache or parent folder.  Please run _updatePublisher.  Aborting...
+    ECHO We're offline...
+    SET "txoption=-tx n/a"
 )
+
+REM Run IG Publisher using Docker
+docker run --rm -v "%CD%":/tmp/ig ghcr.io/trifork/ig-publisher:latest -ig /tmp/ig %txoption% %*
 
 PAUSE
