@@ -32,7 +32,7 @@ parameters:
 # camelcase, but if authors use the formal parameter names, SUSHI
 # will recognize them as well. In either case, they'll be copied
 # to the IG JSON using the formal names.
-copyrightYear: 2024+
+copyrightYear: 2025+
 releaseLabel: STU1
 
 # The publisher can be a single item or a list, each with a name and
@@ -56,8 +56,8 @@ contact:
 # code syntax can be used here.
 
 #jurisdiction: urn:iso:std:iso:3166#US "United States of America"
-jurisdiction: http://unstats.un.org/unsd/methods/m49/m49.htm#001 "World"
-
+#jurisdiction: http://unstats.un.org/unsd/methods/m49/m49.htm#001 "World"
+jurisdiction: http://unstats.un.org/unsd/methods/m49/m49.htm#620 "Portugal"
 
 # The dependencies property corresponds to IG.dependsOn. The key is the
 # package id and the value is the version (or dev/current). For advanced
