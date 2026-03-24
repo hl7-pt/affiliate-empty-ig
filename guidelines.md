@@ -1,13 +1,12 @@
-# HL7 PT IG Life cycle
+# Ciclo de Vida de um IG HL7 PT
 
+Diretrizes para publicação de um Implementation Guide do  HL7 Portugal:
 
-The guidelines for publishing a HL7 Portugal chapter Implementation guide:
+1. Fazer fork deste IG vazio e iniciar o desenvolvimento
+2. Apresentar o desenvolvimento (em curso) ao comité HL7 Portugal para comentários
+3. O projeto é introduzido na organização HL7PT como rascunho com os comentários do comité
+4. O IG é colocado em consulta pública
+5. O IG é votado
+6. O IG é publicado no website HL7 Portugal
 
-1. Fork this empty IG and start developing 
-2. Present the (ongoing) development to the HL7 Portugal committee for commentary
-3. The project is then introduced in the HL7PT Organization as draft with commitee commentaries
-4. IG is present to public commentary
-5. IG is voted
-6. IG is published in the HL7 Portugal website
-
-With new version releases, the website will follow an analogous format of the fhir resources like .../ig/\<ig name\>/\<version\>
+Com o lançamento de novas versões, o website seguirá um formato análogo ao dos recursos FHIR: `.../ig/<nome-do-ig>/<versão>`
