@@ -25,3 +25,5 @@ Thumbs.db
 
 
 .vscode/
+### required for IG Publisher, but not needed in the repo #
+Requirements-fromNarrative.json
