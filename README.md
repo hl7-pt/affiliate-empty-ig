@@ -4,6 +4,13 @@ Este IG serve de template para novos IGs no ecossistema Português.
 
 ---
 
+## Pré-requisitos
+
+- **Docker Desktop** — [download para Mac / Windows / Linux](https://www.docker.com/products/docker-desktop/)
+- Alternativa sem Docker: `java`, `ruby`, `jekyll` e `perl` instalados (ver modos abaixo)
+
+---
+
 ## Publicar o IG
 
 O comando é sempre o mesmo, independentemente do ambiente:
@@ -20,9 +27,29 @@ chmod +x _genonce.sh
 ./_genonce.sh
 ```
 
-O resultado (site HTML) ficará na pasta `output/`.
-
 > **Nota:** Se não houver ligação à internet, o script deteta isso automaticamente e corre em modo offline (sem validação de terminologias).
+
+### 3. Ver o resultado no browser
+
+**Opção simples:** abre o ficheiro `output/index.html` diretamente no browser.
+
+**Opção com servidor local** (recomendado — alguns recursos podem não carregar sem servidor HTTP):
+
+```bash
+python3 -m http.server 8080 -d ./output
+```
+
+Abre [http://localhost:8080](http://localhost:8080) no browser.
+
+Alternativas:
+
+```bash
+# Node.js
+npx serve ./output
+
+# Ruby
+ruby -run -e httpd ./output -p 8080
+```
 
 ---
 
