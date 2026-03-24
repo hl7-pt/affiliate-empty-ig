@@ -1,6 +1,27 @@
 #!/bin/bash
 
 # ──────────────────────────────────────────────
+# Parse --mode flag (optional, overrides auto-detection)
+#   --mode 1  force native Java
+#   --mode 2  force Docker + local jar (pin publisher version)
+#   --mode 3  force Docker bundled image
+# ──────────────────────────────────────────────
+force_mode=""
+args=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --mode)
+      force_mode="$2"
+      if [[ "$force_mode" != "1" && "$force_mode" != "2" && "$force_mode" != "3" ]]; then
+        echo "Error: --mode must be 1, 2, or 3"; exit 1
+      fi
+      shift 2 ;;
+    *) args+=("$1"); shift ;;
+  esac
+done
+set -- "${args[@]}"
+
+# ──────────────────────────────────────────────
 # Internet / terminology server check
 # ──────────────────────────────────────────────
 echo "Checking internet connection..."
@@ -38,35 +59,59 @@ done
 # ──────────────────────────────────────────────
 # Run strategy
 # ──────────────────────────────────────────────
-if [[ -n "$publisher_jar" && "$native_deps_ok" == true ]]; then
-  # ── Strategy 1: native Java (fastest) ──────
-  echo "Running natively with Java: $publisher_jar"
-  export JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Dfile.encoding=UTF-8"
-  java -jar "$publisher_jar" -ig . "${tx_args[@]}" "$@"
 
+# Determine mode: forced or auto-detected
+if [[ -n "$force_mode" ]]; then
+  mode="$force_mode"
+  echo "Mode forced: $mode"
+elif [[ -n "$publisher_jar" && "$native_deps_ok" == true ]]; then
+  mode=1
+elif [[ -n "$publisher_jar" ]]; then
+  mode=2
 else
-  # Docker: force linux/amd64 on macOS — the image has no arm64 manifest
-  platform_args=()
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    platform_args=(--platform linux/amd64)
-  fi
+  mode=3
+fi
 
-  if [[ -n "$publisher_jar" ]]; then
+# Docker: force linux/amd64 on macOS — the image has no arm64 manifest
+platform_args=()
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  platform_args=(--platform linux/amd64)
+fi
+
+case "$mode" in
+  1)
+    # ── Strategy 1: native Java (fastest) ──────
+    if [[ -z "$publisher_jar" ]]; then
+      echo "Error: --mode 1 requires publisher.jar in input-cache/ or parent folder."; exit 1
+    fi
+    echo "Running natively with Java: $publisher_jar"
+    export JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Dfile.encoding=UTF-8"
+    java -jar "$publisher_jar" -ig . "${tx_args[@]}" "$@"
+    ;;
+  2)
     # ── Strategy 2: Docker + local jar ─────────
-    echo "Native deps missing. Using Docker with local publisher.jar: $publisher_jar"
+    # Uses trifork image for the full environment (Sushi, Node, etc.)
+    # but overrides the bundled publisher with the local jar.
+    # Useful when the local jar is newer than the bundled one in the image.
+    if [[ -z "$publisher_jar" ]]; then
+      echo "Error: --mode 2 requires publisher.jar in input-cache/ or parent folder."; exit 1
+    fi
+    echo "Using Docker with local publisher.jar: $publisher_jar"
     docker run --rm "${platform_args[@]}" \
       -v "$(pwd)":/tmp/ig \
       -v "$publisher_jar":/publisher.jar \
       -v "$HOME/.fhir":/root/.fhir \
-      ghcr.io/fhir/ig-publisher-base \
-      java -jar /publisher.jar -ig /tmp/ig "${tx_args[@]}" "$@"
-  else
+      --entrypoint java \
+      ghcr.io/trifork/ig-publisher:latest \
+      -jar /publisher.jar -ig /tmp/ig "${tx_args[@]}" "$@"
+    ;;
+  3)
     # ── Strategy 3: Docker bundled image ───────
-    echo "No publisher.jar found. Using ghcr.io/trifork/ig-publisher:latest"
+    echo "Using ghcr.io/trifork/ig-publisher:latest"
     docker run --rm "${platform_args[@]}" \
       -v "$(pwd)":/tmp/ig \
       -v "$HOME/.fhir":/root/.fhir \
       ghcr.io/trifork/ig-publisher:latest \
       -ig /tmp/ig "${tx_args[@]}" "$@"
-  fi
-fi
+    ;;
+esac

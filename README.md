@@ -27,6 +27,13 @@ chmod +x _genonce.sh
 ./_genonce.sh
 ```
 
+O script escolhe automaticamente o melhor modo disponível. Para forçar um modo específico:
+
+```bash
+./_genonce.sh --mode 2   # Docker com jar local
+./_genonce.sh --mode 3   # Docker com imagem completa
+```
+
 > **Nota:** Se não houver ligação à internet, o script deteta isso automaticamente e corre em modo offline (sem validação de terminologias).
 
 ### 3. Ver o resultado no browser
