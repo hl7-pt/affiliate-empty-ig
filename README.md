@@ -13,26 +13,47 @@ Este IG serve de template para novos IGs no ecossistema Português.
 
 ## Publicar o IG
 
-O comando é sempre o mesmo, independentemente do ambiente:
+### macOS / Linux
 
-### 1. Dar permissão ao script (só na primeira vez)
+#### 1. Dar permissão ao script (só na primeira vez)
 
 ```bash
 chmod +x _genonce.sh
 ```
 
-### 2. Correr o publisher
+#### 2. Correr o publisher
 
 ```bash
 ./_genonce.sh
 ```
 
-O script escolhe automaticamente o melhor modo disponível. Para forçar um modo específico:
+Para forçar um modo específico:
 
 ```bash
 ./_genonce.sh --mode 2   # Docker com jar local
 ./_genonce.sh --mode 3   # Docker com imagem completa
 ```
+
+---
+
+### Windows
+
+Fazer duplo clique em `_genonce.bat`, ou correr na linha de comandos:
+
+```bat
+_genonce.bat
+```
+
+Para forçar um modo específico:
+
+```bat
+_genonce.bat --mode 2
+_genonce.bat --mode 3
+```
+
+> **Nota Windows:** o Docker Desktop no Windows usa WSL2 e corre sempre containers `linux/amd64` nativamente — não são necessárias configurações adicionais.
+
+---
 
 > **Nota:** Se não houver ligação à internet, o script deteta isso automaticamente e corre em modo offline (sem validação de terminologias).
 
@@ -43,7 +64,13 @@ O script escolhe automaticamente o melhor modo disponível. Para forçar um modo
 **Opção com servidor local** (recomendado — alguns recursos podem não carregar sem servidor HTTP):
 
 ```bash
+# macOS / Linux
 python3 -m http.server 8080 -d ./output
+```
+
+```bat
+REM Windows
+python -m http.server 8080 -d output
 ```
 
 Abre [http://localhost:8080](http://localhost:8080) no browser.
@@ -51,10 +78,10 @@ Abre [http://localhost:8080](http://localhost:8080) no browser.
 Alternativas:
 
 ```bash
-# Node.js
+# Node.js (todas as plataformas)
 npx serve ./output
 
-# Ruby
+# Ruby (macOS / Linux)
 ruby -run -e httpd ./output -p 8080
 ```
 
@@ -62,7 +89,7 @@ ruby -run -e httpd ./output -p 8080
 
 ## Como o script escolhe o modo de execução
 
-O script `_genonce.sh` deteta automaticamente o melhor modo disponível, por esta ordem:
+Os scripts `_genonce.sh` / `_genonce.bat` detetam automaticamente o melhor modo disponível, por esta ordem:
 
 ### Modo 1 — Java nativo (mais rápido)
 
@@ -80,12 +107,18 @@ Corre diretamente com `java -jar`, sem Docker.
 
 **Condições:** `publisher.jar` encontrado, mas alguma dependência nativa em falta.
 
-Usa a imagem `ghcr.io/fhir/ig-publisher-base` (apenas o runtime Java) e monta o jar local dentro do container. Permite controlar exatamente qual versão do [IG Publisher](https://github.com/HL7/fhir-ig-publisher/releases) é usada.
+Usa a imagem `ghcr.io/trifork/ig-publisher:latest` como ambiente (Sushi, Node, etc.) mas executa o jar local em vez do bundled. Útil quando o jar local é mais recente do que o incluído na imagem.
 
-Para obter o `publisher.jar`, corre:
+Para obter o `publisher.jar`:
 
 ```bash
+# macOS / Linux
 ./_updatePublisher.sh
+```
+
+```bat
+REM Windows
+_updatePublisher.bat
 ```
 
 ---
@@ -96,15 +129,18 @@ Para obter o `publisher.jar`, corre:
 
 Usa a imagem `ghcr.io/trifork/ig-publisher:latest`, que já inclui Java e o [IG Publisher](https://github.com/HL7/fhir-ig-publisher/releases). Não é necessário instalar nada além do Docker.
 
-**Pré-requisito:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e em execução.
-
 Na primeira execução, o Docker faz download da imagem (~500 MB). As seguintes são muito mais rápidas.
 
 ---
 
-## Cache de pacotes FHIR (`~/.fhir`)
+## Cache de pacotes FHIR
 
-Nos modos Docker, a pasta `~/.fhir` do host é montada no container. Esta pasta contém os pacotes FHIR descarregados (dependências do IG), pelo que não são repetidamente descarregados a cada execução.
+Nos modos Docker, a pasta de cache FHIR do host é montada no container, evitando downloads repetidos a cada execução.
+
+| Plataforma | Pasta |
+| --- | --- |
+| macOS / Linux | `~/.fhir` |
+| Windows | `%USERPROFILE%\.fhir` |
 
 ---
 
@@ -119,7 +155,13 @@ docker pull ghcr.io/trifork/ig-publisher:latest
 **Modos 1 e 2 (jar local):** corre o script de atualização, que descarrega a versão mais recente do [IG Publisher](https://github.com/HL7/fhir-ig-publisher/releases):
 
 ```bash
+# macOS / Linux
 ./_updatePublisher.sh
+```
+
+```bat
+REM Windows
+_updatePublisher.bat
 ```
 
 ---
@@ -142,21 +184,27 @@ docker pull ghcr.io/trifork/ig-publisher:latest
 
 ## Resolução de problemas
 
-**"docker: command not found"**
+**"docker: command not found" / "docker não é reconhecido"**
 → Instala o [Docker Desktop](https://www.docker.com/products/docker-desktop/) e certifica-te que está em execução.
 
-**"permission denied" ao correr o script**
+**"permission denied" ao correr o script (macOS/Linux)**
 → Corre `chmod +x _genonce.sh` primeiro.
 
 **Erro de terminologia / validação**
 → Se estiveres offline, o script deteta isso e usa `-tx n/a` automaticamente. Se estiveres online e o erro persistir, podes forçar o modo offline:
 
 ```bash
+# macOS / Linux
 ./_genonce.sh -tx n/a
 ```
 
+```bat
+REM Windows
+_genonce.bat -tx n/a
+```
+
 **Conflito de versão do publisher (modo 3)**
-→ Para fixar uma versão específica, edita `_genonce.sh` e substitui `latest` pela tag desejada, por exemplo `ghcr.io/trifork/ig-publisher:v1.6.x`.
+→ Para fixar uma versão específica, substitui `latest` pela tag desejada nos scripts, por exemplo `ghcr.io/trifork/ig-publisher:v1.6.x`.
 
 **O modo nativo falha mas Java está instalado**
 → Verifica se `ruby`, `jekyll` e `perl` também estão instalados. Se algum faltar, o script usa Docker automaticamente.
