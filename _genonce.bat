@@ -27,6 +27,21 @@ IF NOT "%~1"=="" (
 )
 
 REM ──────────────────────────────────────────────
+REM Detect WSL distro name and username for Docker mounts
+REM ──────────────────────────────────────────────
+SET "wsl_distro="
+SET "wsl_user="
+FOR /F "tokens=*" %%i IN ('wsl -l -q 2^>nul ^| findstr /R "^[A-Za-z]"') DO (
+    IF "!wsl_distro!"=="" SET "wsl_distro=%%i"
+)
+IF NOT "!wsl_distro!"=="" (
+    FOR /F "tokens=*" %%u IN ('wsl -d !wsl_distro! whoami 2^>nul') DO SET "wsl_user=%%u"
+)
+IF "!wsl_distro!"=="" SET "wsl_distro=Ubuntu"
+IF "!wsl_user!"=="" SET "wsl_user=root"
+ECHO WSL distro: !wsl_distro!, user: !wsl_user!
+
+REM ──────────────────────────────────────────────
 REM Internet / terminology server check
 REM ──────────────────────────────────────────────
 ECHO Checking internet connection...
@@ -109,11 +124,12 @@ IF "!publisher_jar!"=="" (
     ECHO "Error: --mode 2 requires publisher.jar in input-cache/ or parent folder."
     EXIT /B 1
 )
+CALL :sync_to_wsl || EXIT /B 1
 ECHO Using Docker with local publisher.jar: !publisher_jar!
 docker run --rm ^
-  -v "%CD%":/tmp/ig ^
+  -v "//wsl$/!wsl_distro!/tmp/ig":/tmp/ig ^
   -v "!publisher_jar!":/publisher.jar ^
-  -v "%USERPROFILE%\.fhir":/root/.fhir ^
+  -v "//wsl$/!wsl_distro!/home/!wsl_user!/.fhir":/root/.fhir ^
   --entrypoint java ^
   ghcr.io/trifork/ig-publisher:latest ^
   -jar /publisher.jar -ig /tmp/ig !tx_args! !extra_args!
@@ -121,13 +137,29 @@ GOTO end
 
 :mode3
 REM ── Strategy 3: Docker bundled image ───────
+CALL :sync_to_wsl || EXIT /B 1
 ECHO Using ghcr.io/trifork/ig-publisher:latest
 docker run --rm ^
-  -v "%CD%":/tmp/ig ^
-  -v "%USERPROFILE%\.fhir":/root/.fhir ^
+  -v "//wsl$/!wsl_distro!/tmp/ig":/tmp/ig ^
+  -v "//wsl$/!wsl_distro!/home/!wsl_user!/.fhir":/root/.fhir ^
   ghcr.io/trifork/ig-publisher:latest ^
   -ig /tmp/ig !tx_args! !extra_args!
 GOTO end
+
+:sync_to_wsl
+REM ── Sync the Windows project directory into WSL /tmp/ig ──
+ECHO Syncing project to WSL /tmp/ig...
+wsl -d !wsl_distro! -- bash -c "rm -rf /tmp/ig && mkdir -p /tmp/ig"
+IF !ERRORLEVEL! NEQ 0 (
+    ECHO "Error: Failed to prepare /tmp/ig in WSL distro '!wsl_distro!'"
+    EXIT /B 1
+)
+wsl -d !wsl_distro! -- bash -c "cp -r \"$(wslpath '%CD%')/\". /tmp/ig/"
+IF !ERRORLEVEL! NEQ 0 (
+    ECHO "Error: Failed to copy project files to WSL /tmp/ig"
+    EXIT /B 1
+)
+EXIT /B 0
 
 :end
 PAUSE
