@@ -27,6 +27,21 @@ IF NOT "%~1"=="" (
 )
 
 REM ──────────────────────────────────────────────
+REM Detect WSL distro name and username for Docker mounts
+REM ──────────────────────────────────────────────
+SET "wsl_distro="
+SET "wsl_user="
+FOR /F "tokens=*" %%i IN ('wsl -l -q 2^>nul ^| findstr /R "^[A-Za-z]"') DO (
+    IF "!wsl_distro!"=="" SET "wsl_distro=%%i"
+)
+IF NOT "!wsl_distro!"=="" (
+    FOR /F "tokens=*" %%u IN ('wsl -d !wsl_distro! whoami 2^>nul') DO SET "wsl_user=%%u"
+)
+IF "!wsl_distro!"=="" SET "wsl_distro=Ubuntu"
+IF "!wsl_user!"=="" SET "wsl_user=root"
+ECHO WSL distro: !wsl_distro!, user: !wsl_user!
+
+REM ──────────────────────────────────────────────
 REM Internet / terminology server check
 REM ──────────────────────────────────────────────
 ECHO Checking internet connection...
@@ -113,8 +128,8 @@ ECHO Using Docker with local publisher.jar: !publisher_jar!
 docker run --rm ^
   -v "%CD%":/tmp/ig ^
   -v "!publisher_jar!":/publisher.jar ^
-  -v "//wsl$/Ubuntu/home/.fhir":/root/.fhir ^
-  -v "//wsl$/Ubuntu/tmp/ig-output":/tmp/ig/output ^
+  -v "//wsl$/!wsl_distro!/home/!wsl_user!/.fhir":/root/.fhir ^
+  -v "//wsl$/!wsl_distro!/tmp/ig-output":/tmp/ig/output ^
   --entrypoint java ^
   ghcr.io/trifork/ig-publisher:latest ^
   -jar /publisher.jar -ig /tmp/ig !tx_args! !extra_args!
@@ -125,8 +140,8 @@ REM ── Strategy 3: Docker bundled image ───────
 ECHO Using ghcr.io/trifork/ig-publisher:latest
 docker run --rm ^
   -v "%CD%":/tmp/ig ^
-  -v "//wsl$/Ubuntu/home/.fhir":/root/.fhir ^
-  -v "//wsl$/Ubuntu/tmp/ig-output":/tmp/ig/output ^
+  -v "//wsl$/!wsl_distro!/home/!wsl_user!/.fhir":/root/.fhir ^
+  -v "//wsl$/!wsl_distro!/tmp/ig-output":/tmp/ig/output ^
   ghcr.io/trifork/ig-publisher:latest ^
   -ig /tmp/ig !tx_args! !extra_args!
 GOTO end
