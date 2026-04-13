@@ -93,7 +93,7 @@ IF "!mode!"=="3" GOTO mode3
 :mode1
 REM ── Strategy 1: native Java (fastest) ──────
 IF "!publisher_jar!"=="" (
-    ECHO Error: --mode 1 requires publisher.jar in input-cache/ or parent folder.
+    ECHO "Error: --mode 1 requires publisher.jar in input-cache/ or parent folder."
     EXIT /B 1
 )
 ECHO Running natively with Java: !publisher_jar!
@@ -106,7 +106,7 @@ REM ── Strategy 2: Docker + local jar ─────────
 REM Uses trifork image for the full environment (Sushi, Node, etc.)
 REM but overrides the bundled publisher with the local jar
 IF "!publisher_jar!"=="" (
-    ECHO Error: --mode 2 requires publisher.jar in input-cache/ or parent folder.
+    ECHO "Error: --mode 2 requires publisher.jar in input-cache/ or parent folder."
     EXIT /B 1
 )
 ECHO Using Docker with local publisher.jar: !publisher_jar!
