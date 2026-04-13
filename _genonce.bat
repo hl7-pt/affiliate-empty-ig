@@ -124,9 +124,7 @@ IF "!publisher_jar!"=="" (
     ECHO "Error: --mode 2 requires publisher.jar in input-cache/ or parent folder."
     EXIT /B 1
 )
-ECHO Syncing project to WSL /tmp/ig...
-wsl -d !wsl_distro! -- bash -c "rm -rf /tmp/ig && mkdir -p /tmp/ig"
-wsl -d !wsl_distro! -- bash -c "cp -r $(wslpath '%CD%')/. /tmp/ig/"
+CALL :sync_to_wsl || EXIT /B 1
 ECHO Using Docker with local publisher.jar: !publisher_jar!
 docker run --rm ^
   -v "//wsl$/!wsl_distro!/tmp/ig":/tmp/ig ^
@@ -139,9 +137,7 @@ GOTO end
 
 :mode3
 REM ── Strategy 3: Docker bundled image ───────
-ECHO Syncing project to WSL /tmp/ig...
-wsl -d !wsl_distro! -- bash -c "rm -rf /tmp/ig && mkdir -p /tmp/ig"
-wsl -d !wsl_distro! -- bash -c "cp -r $(wslpath '%CD%')/. /tmp/ig/"
+CALL :sync_to_wsl || EXIT /B 1
 ECHO Using ghcr.io/trifork/ig-publisher:latest
 docker run --rm ^
   -v "//wsl$/!wsl_distro!/tmp/ig":/tmp/ig ^
@@ -149,6 +145,21 @@ docker run --rm ^
   ghcr.io/trifork/ig-publisher:latest ^
   -ig /tmp/ig !tx_args! !extra_args!
 GOTO end
+
+:sync_to_wsl
+REM ── Sync the Windows project directory into WSL /tmp/ig ──
+ECHO Syncing project to WSL /tmp/ig...
+wsl -d !wsl_distro! -- bash -c "rm -rf /tmp/ig && mkdir -p /tmp/ig"
+IF !ERRORLEVEL! NEQ 0 (
+    ECHO "Error: Failed to prepare /tmp/ig in WSL distro '!wsl_distro!'"
+    EXIT /B 1
+)
+wsl -d !wsl_distro! -- bash -c "cp -r \"$(wslpath '%CD%')/\". /tmp/ig/"
+IF !ERRORLEVEL! NEQ 0 (
+    ECHO "Error: Failed to copy project files to WSL /tmp/ig"
+    EXIT /B 1
+)
+EXIT /B 0
 
 :end
 PAUSE
