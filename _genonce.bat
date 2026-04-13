@@ -14,7 +14,7 @@ SET "extra_args="
 IF "%~1"=="--mode" (
     SET "force_mode=%~2"
     IF NOT "!force_mode!"=="1" IF NOT "!force_mode!"=="2" IF NOT "!force_mode!"=="3" (
-        ECHO Error: --mode must be 1 (native Java), 2 (Docker + local jar), or 3 (Docker bundled)
+        ECHO "Error: --mode must be 1 (native Java), 2 (Docker + local jar), or 3 (Docker bundled)"
         EXIT /B 1
     )
     SHIFT & SHIFT
