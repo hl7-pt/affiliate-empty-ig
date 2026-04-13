@@ -100,8 +100,7 @@ case "$mode" in
     docker run --rm "${platform_args[@]}" \
       -v "$(pwd)":/tmp/ig \
       -v "$publisher_jar":/publisher.jar \
-      -v "$HOME/.fhir":/home/.fhir \
-      -e FHIR_CACHE_HOME=/home/.fhir \
+      -v "$HOME/.fhir":/root/.fhir \
       --entrypoint java \
       ghcr.io/trifork/ig-publisher:latest \
       -jar /publisher.jar -ig /tmp/ig "${tx_args[@]}" "$@"
@@ -111,8 +110,7 @@ case "$mode" in
     echo "Using ghcr.io/trifork/ig-publisher:latest"
     docker run --rm "${platform_args[@]}" \
       -v "$(pwd)":/tmp/ig \
-      -v "$HOME/.fhir":/home/.fhir \
-      -e FHIR_CACHE_HOME=/home/.fhir \
+      -v "$HOME/.fhir":/root/.fhir \
       ghcr.io/trifork/ig-publisher:latest \
       -ig /tmp/ig "${tx_args[@]}" "$@"
     ;;
