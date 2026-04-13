@@ -113,7 +113,8 @@ ECHO Using Docker with local publisher.jar: !publisher_jar!
 docker run --rm ^
   -v "%CD%":/tmp/ig ^
   -v "!publisher_jar!":/publisher.jar ^
-  -v "%USERPROFILE%\.fhir":/root/.fhir ^
+  -v "%USERPROFILE%\.fhir":/home/.fhir ^
+  -e FHIR_CACHE_HOME=/home/.fhir ^
   --entrypoint java ^
   ghcr.io/trifork/ig-publisher:latest ^
   -jar /publisher.jar -ig /tmp/ig !tx_args! !extra_args!
@@ -124,7 +125,8 @@ REM ── Strategy 3: Docker bundled image ───────
 ECHO Using ghcr.io/trifork/ig-publisher:latest
 docker run --rm ^
   -v "%CD%":/tmp/ig ^
-  -v "%USERPROFILE%\.fhir":/root/.fhir ^
+  -v "%USERPROFILE%\.fhir":/home/.fhir ^
+  -e FHIR_CACHE_HOME=/home/.fhir ^
   ghcr.io/trifork/ig-publisher:latest ^
   -ig /tmp/ig !tx_args! !extra_args!
 GOTO end
