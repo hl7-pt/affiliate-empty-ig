@@ -124,12 +124,14 @@ IF "!publisher_jar!"=="" (
     ECHO "Error: --mode 2 requires publisher.jar in input-cache/ or parent folder."
     EXIT /B 1
 )
+ECHO Syncing project to WSL /tmp/ig...
+wsl -d !wsl_distro! -- bash -c "rm -rf /tmp/ig && mkdir -p /tmp/ig"
+wsl -d !wsl_distro! -- bash -c "cp -r $(wslpath '%CD%')/. /tmp/ig/"
 ECHO Using Docker with local publisher.jar: !publisher_jar!
 docker run --rm ^
-  -v "%CD%":/tmp/ig ^
+  -v "//wsl$/!wsl_distro!/tmp/ig":/tmp/ig ^
   -v "!publisher_jar!":/publisher.jar ^
   -v "//wsl$/!wsl_distro!/home/!wsl_user!/.fhir":/root/.fhir ^
-  -v "//wsl$/!wsl_distro!/tmp/ig-output":/tmp/ig/output ^
   --entrypoint java ^
   ghcr.io/trifork/ig-publisher:latest ^
   -jar /publisher.jar -ig /tmp/ig !tx_args! !extra_args!
@@ -137,11 +139,13 @@ GOTO end
 
 :mode3
 REM ── Strategy 3: Docker bundled image ───────
+ECHO Syncing project to WSL /tmp/ig...
+wsl -d !wsl_distro! -- bash -c "rm -rf /tmp/ig && mkdir -p /tmp/ig"
+wsl -d !wsl_distro! -- bash -c "cp -r $(wslpath '%CD%')/. /tmp/ig/"
 ECHO Using ghcr.io/trifork/ig-publisher:latest
 docker run --rm ^
-  -v "%CD%":/tmp/ig ^
+  -v "//wsl$/!wsl_distro!/tmp/ig":/tmp/ig ^
   -v "//wsl$/!wsl_distro!/home/!wsl_user!/.fhir":/root/.fhir ^
-  -v "//wsl$/!wsl_distro!/tmp/ig-output":/tmp/ig/output ^
   ghcr.io/trifork/ig-publisher:latest ^
   -ig /tmp/ig !tx_args! !extra_args!
 GOTO end
